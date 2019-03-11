@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>(╯°□°)╯︵ ┻━┻</title>
+<link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+<link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+<style> 
+h1 {
+  font-size: 64px;
+}
+
+span.a {
+  -ms-transform: rotate(180deg); /* IE 9 */
+  -webkit-transform: rotate(180deg); /* Safari 3-8 */
+  transform: rotate(180deg);
+  float:left;
+  height: 90px;
+}
+
+span.b {
+  float:left;
+}
+
+.a img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+</style>
+</head>
+
+<body>
+  <!-- <h1 align="center">(╯°□°)╯︵ ┻━┻</h1> -->
+  <h1><span class="b">(╯°□°)╯︵&nbsp;</span><span id="flip" class="a">┬─┬</span></h1>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const flip = urlParams.get('flip');
+  if (flip !== null && flip !== "") {
+    if (flip.startsWith("http")) {
+      document.getElementById("flip").innerHTML = "<img class='a' src='" +  flip + "'>";
+      console.log(flip)
+    } else {
+      document.getElementById("flip").textContent = flip;
+    }
+  }
+</script>
+</body>
+
+</html>
