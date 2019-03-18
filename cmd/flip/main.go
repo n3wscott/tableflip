@@ -18,8 +18,7 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/img",handler)
-	http.HandleFunc("/",pageHandler)
+	http.HandleFunc("/", handler)
 	log.Println("Listening on 8080")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
@@ -27,40 +26,24 @@ func main() {
 	}
 }
 
-
 var (
-	dpi      = flag.Float64("dpi", 72, "screen resolution in Dots Per Inch")
-	size     = flag.Float64("size", 90, "font size in points")
+	dpi  = flag.Float64("dpi", 92, "screen resolution in Dots Per Inch")
+	size = flag.Float64("size", 72, "font size in points")
 
 	lp = 10
 	tp = 6
 	bp = 25
-	fh = 90
+	fh = 96
 	rp = 10
-	)
+)
 
-func addLabel(x, y int, label string) image.Image {
-
-	fontPath, err := findfont.Find("Arial Unicode.ttf")
-	if err != nil {
-		fontPath = "/var/run/ko/Arial Unicode.ttf"
-	}
-	log.Print("font: " + fontPath)
-
-	// load the font with the freetype library
-	fontData, err := ioutil.ReadFile(fontPath)
-	if err != nil {
-		panic(err)
-	}
-	f, err := truetype.Parse(fontData)
-	if err != nil {
-		panic(err)
-	}
-
+func imageWithLabel(label string) image.Image {
+	x := 0
+	y := fh
 
 	// Initialize the context.
 	fg, bg := image.Black, image.White
-	rgba := image.NewRGBA(image.Rect(0, 0, 750, tp+bp+fh))
+	rgba := image.NewRGBA(image.Rect(0, 0, 750, fh))
 	draw.Draw(rgba, rgba.Bounds(), bg, image.ZP, draw.Src)
 	c := freetype.NewContext()
 	c.SetDPI(*dpi)
@@ -76,18 +59,84 @@ func addLabel(x, y int, label string) image.Image {
 		// handle error
 		return rgba
 	} else {
-		return rgba.SubImage(image.Rect(0, 0, n.X.Round()+rp, n.Y.Round()+bp))
+		return rgba.SubImage(image.Rect(0, 0, n.X.Round(), n.Y.Round()))
+	}
+}
+
+func tableFlip(flip, table string) image.Image {
+
+	flipImage := imageWithLabel(flip)
+	tableImage := imageWithLabel(table)
+
+	imgX := flipImage.Bounds().Max.X + tableImage.Bounds().Max.X // todo plus padding
+	imgY := flipImage.Bounds().Max.Y                             // todo plus padding
+
+	img := image.NewRGBA(image.Rect(0, 0, imgX, imgY))
+
+	oX := 0
+	oY := 0
+	for x := 0; x < flipImage.Bounds().Max.X; x++ {
+		for y := 0; y < flipImage.Bounds().Max.Y; y++ {
+			img.Set(x+oX, y+oY, flipImage.At(x, y))
+		}
+	}
+	oX += flipImage.Bounds().Max.X
+
+	maxX := tableImage.Bounds().Max.X
+	maxY := tableImage.Bounds().Max.Y
+	for x := 0; x < maxX; x++ {
+		for y := 0; y < maxY; y++ {
+			img.Set(oX+(maxX-1-x), oY+(maxY-1-y), tableImage.At(x, y))
+		}
+	}
+
+	return img
+}
+
+func getQueryParam(r *http.Request, key string) string {
+	keys, ok := r.URL.Query()[key]
+	if !ok || len(keys[0]) < 1 {
+		return ""
+	}
+	return keys[0]
+}
+
+var f *truetype.Font
+
+func init() {
+	fontPath, err := findfont.Find("Arial Unicode.ttf")
+	if err != nil {
+		fontPath = "/var/run/ko/Arial Unicode.ttf"
+	}
+	log.Print("font: " + fontPath)
+
+	// load the font with the freetype library
+	fontData, err := ioutil.ReadFile(fontPath)
+	if err != nil {
+		panic(err)
+	}
+	f, err = truetype.Parse(fontData)
+	if err != nil {
+		panic(err)
 	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	img := addLabel(lp, tp+fh, "(╯°□°)╯︵ ┻━┻")
-	writeImage(w, &img)
-}
 
-func pageHandler(w http.ResponseWriter, r *http.Request) {
-	img := addLabel(lp, tp+fh, "(╯°□°)╯︵ ┻━┻")
-	writeImageWithTemplate(w, &img)
+	page := getQueryParam(r, "page")
+
+	flip := getQueryParam(r, "flip")
+	if flip == "" {
+		flip = "┬─┬"
+	}
+
+	img := tableFlip("(╯°□°)╯︵ ", flip)
+
+	if page == "html" {
+		writeImageWithTemplate(w, &img)
+	} else {
+		writeImage(w, &img)
+	}
 }
 
 var ImageTemplate string = `<!DOCTYPE html>
