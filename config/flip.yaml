@@ -10,4 +10,4 @@ spec:
       revisionTemplate:
         spec:
           container:
-            image: github.com/n3wscott/tableflip/cmd/flip/
+            image: ko://github.com/n3wscott/tableflip/cmd/flip/

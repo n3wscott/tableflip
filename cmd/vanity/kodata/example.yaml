@@ -1,0 +1,39 @@
+host: example.com
+
+paths:
+  /foo:
+    repo: https://github.com/example/foo
+
+  /bar:
+    repo: https://github.com/example/bar
+
+  /foo5:
+    repo: https://github.com/example/foo
+
+  /bar5:
+    repo: https://github.com/example/bar
+
+  /foo4:
+    repo: https://github.com/example/foo
+
+  /bar44:
+    repo: https://github.com/example/bar
+
+  /foo3:
+    repo: https://github.com/example/foo
+
+  /bar3:
+    repo: https://github.com/example/bar
+
+  /foo2:
+    repo: https://github.com/example/foo
+
+  /bar2:
+    repo: https://github.com/example/bar
+
+  /foo11:
+    repo: https://github.com/example/foo
+
+  /bar11:
+    repo: https://github.com/example/bar
+
